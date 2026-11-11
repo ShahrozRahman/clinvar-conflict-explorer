@@ -1,0 +1,85 @@
+{
+  "variants": 65172,
+  "genes": 2328,
+  "conflict_rate": 0.2519947216596084,
+  "models": {
+    "Fold prevalence": {
+      "average_precision": 0.2519947187290152,
+      "roc_auc": 0.5,
+      "folds": [
+        {
+          "average_precision": 0.2519564216664109,
+          "roc_auc": 0.5
+        },
+        {
+          "average_precision": 0.25207118748082236,
+          "roc_auc": 0.5
+        },
+        {
+          "average_precision": 0.2519564216664109,
+          "roc_auc": 0.5
+        },
+        {
+          "average_precision": 0.2520138089758343,
+          "roc_auc": 0.5
+        },
+        {
+          "average_precision": 0.25197575385559734,
+          "roc_auc": 0.5
+        }
+      ]
+    },
+    "Population frequencies": {
+      "average_precision": 0.2994260893045868,
+      "roc_auc": 0.5741121368967685,
+      "folds": [
+        {
+          "average_precision": 0.29986035203048766,
+          "roc_auc": 0.5692610949748587
+        },
+        {
+          "average_precision": 0.2904285657838802,
+          "roc_auc": 0.5674401111163132
+        },
+        {
+          "average_precision": 0.3043329382916957,
+          "roc_auc": 0.5801174302757738
+        },
+        {
+          "average_precision": 0.309495922096813,
+          "roc_auc": 0.5846823869180033
+        },
+        {
+          "average_precision": 0.2930126683200575,
+          "roc_auc": 0.5690596611988937
+        }
+      ]
+    },
+    "Frequencies + annotations": {
+      "average_precision": 0.31875078808140955,
+      "roc_auc": 0.6011123738009003,
+      "folds": [
+        {
+          "average_precision": 0.3302422201422384,
+          "roc_auc": 0.6089554327118273
+        },
+        {
+          "average_precision": 0.29929455110577596,
+          "roc_auc": 0.5787396257627542
+        },
+        {
+          "average_precision": 0.31597679487464975,
+          "roc_auc": 0.6029281832661857
+        },
+        {
+          "average_precision": 0.33564919385907827,
+          "roc_auc": 0.6176885142255004
+        },
+        {
+          "average_precision": 0.3125911804253054,
+          "roc_auc": 0.597250113038234
+        }
+      ]
+    }
+  }
+}
