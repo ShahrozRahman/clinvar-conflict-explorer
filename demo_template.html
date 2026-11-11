@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClinVar Conflict Explorer</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f2f6f5;color:#122c2a;font:16px system-ui,sans-serif}
+main{width:min(1080px,92vw);margin:50px auto}h1{font-size:clamp(2rem,5vw,3.7rem);letter-spacing:-.055em;margin:0}p{line-height:1.55}
+section{background:white;border:1px solid #d5e4e0;border-radius:16px;padding:clamp(14px,3vw,28px);margin-top:22px}h2{margin-top:0;font-size:1.2rem}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}
+th,td{padding:.7rem;border-bottom:1px solid #e2ebe9}th{color:#32524e}
+.controls{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px}input,select{font:inherit;padding:.65rem;border:1px solid #76958d;border-radius:8px;max-width:100%}
+button{font:inherit;background:#155d50;color:white;border:0;border-radius:8px;padding:.45rem .8rem;cursor:pointer}button:disabled{opacity:.45;cursor:default}
+footer{margin-top:20px}a{color:#155d50}.pagination{display:flex;align-items:center;gap:12px;margin-top:12px}
+</style>
+</head>
+<body><main>
+<h1>ClinVar Conflict Explorer</h1>
+<p>Can population frequencies and molecular annotations help identify variants with conflicting classifications? Explore predictions on variants from genes held out during training.</p>
+<section><h2>Five-fold benchmark</h2><p id="summary"></p>
+<div class="table-wrap"><table><thead><tr><th>Model</th><th>Average precision</th><th>ROC AUC</th></tr></thead><tbody id="models"></tbody></table></div>
+</section>
+<section><h2>Held-out predictions</h2>
+<p id="sample-note"></p>
+<div class="controls">
+<input id="query" aria-label="Search by gene or variant" placeholder="Search gene or variant">
+<select id="outcome" aria-label="Recorded outcome"><option value="">All outcomes</option><option value="1">Recorded conflict</option><option value="0">No recorded conflict</option></select>
+</div>
+<div class="table-wrap"><table><thead><tr><th>Gene</th><th>Variant</th><th>Recorded conflict</th><th>Frequency score</th><th>Combined score ↓</th></tr></thead><tbody id="variants"></tbody></table></div>
+<div class="pagination"><button id="previous">Previous</button><span id="status" aria-live="polite"></span><button id="next">Next</button></div>
+</section>
+<footer><p>Scores describe disagreement in a historical snapshot. They do not estimate pathogenicity. <a href="https://www.kaggle.com/datasets/kevinarvai/clinvar-conflicting">Dataset by Kevin Arvai</a></p></footer>
+</main>
+<script>
+const data = /* PAYLOAD */;
+const el = id => document.getElementById(id);
+const number = n => n.toLocaleString("en");
+const decimal = n => n.toFixed(3);
+const variant = row => row.CHROM + ":" + row.POS + " " + row.REF + ">" + row.ALT;
+function renderRows(target, rows) {
+  const body = el(target);
+  body.replaceChildren();
+  for (const values of rows) {
+    const row = body.insertRow();
+    for (const value of values) row.insertCell().textContent = value;
+  }
+}
+el("summary").textContent = number(data.metrics.variants) + " variants across " +
+  number(data.metrics.genes) + " genes. " + (100 * data.metrics.conflict_rate).toFixed(1) +
+  "% had recorded conflicts. Metrics are averages across folds.";
+el("sample-note").textContent = "Browse a reproducible sample of " + number(data.rows.length) +
+  " predictions. Scores range from 0 to 1.";
+renderRows("models", Object.entries(data.metrics.models).map(([name, metrics]) =>
+  [name, decimal(metrics.average_precision), decimal(metrics.roc_auc)]));
+data.rows.sort((a,b) => b.annotation_score - a.annotation_score);
+let page = 0;
+const pageSize = 15;
+function render() {
+  const query = el("query").value.trim().toUpperCase();
+  const outcome = el("outcome").value;
+  const matches = data.rows.filter(row =>
+    (row.SYMBOL + " " + variant(row)).toUpperCase().includes(query) &&
+    (outcome === "" || String(row.CLASS) === outcome));
+  const start = page * pageSize;
+  renderRows("variants", matches.slice(start, start + pageSize).map(row =>
+    [row.SYMBOL, variant(row), row.CLASS ? "Yes" : "No", decimal(row.frequency_score), decimal(row.annotation_score)]));
+  el("status").textContent = matches.length ?
+    (start + 1) + "–" + Math.min(start + pageSize, matches.length) + " of " + matches.length : "No matches";
+  el("previous").disabled = page === 0;
+  el("next").disabled = start + pageSize >= matches.length;
+}
+function resetPage() { page = 0; render(); }
+el("query").addEventListener("input", resetPage);
+el("outcome").addEventListener("change", resetPage);
+el("previous").addEventListener("click", () => { page -= 1; render(); });
+el("next").addEventListener("click", () => { page += 1; render(); });
+render();
+</script></body></html>
